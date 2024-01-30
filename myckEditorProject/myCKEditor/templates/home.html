@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Code Editor</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    {% load static %}
+    <script src="{% static 'ckeditor/ckeditor-init.js' %}"></script>
+    <script src="{% static 'ckeditor/ckeditor/ckeditor.js' %}"></script>
+    <script src="https://cdn.ckeditor.com/4.16.0/standard/ckeditor.js"></script>
+    <style>
+        #main {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            height: 395px; /* Adjust the height as needed */
+        }
+        #left, #right {
+            width: 50%;
+            height: 100%; /* Set height to 100% to match the height of the main div */
+        }
+        #left {
+            text-align: left;
+        }
+        #right {
+            text-align: right;
+        }
+        #left textarea, #right textarea {
+            width: calc(100% - 20px); /* Adjust as needed */
+            /* Assuming you want some margin between the textareas */
+            margin-right: 10px; /* Adjust as needed */
+            height: 100%; /* Set height to 100% to match the height of the div */
+        }
+    </style>    
+</head>
+<body>
+    <h1 style="text-align: center; color: #000080;"><u>Welcome to the My Code Editor home page!</u></h1><br>
+    <div id="main">
+        <div id="left">
+            <button style="margin-right: 5px;" id="generateCodeButton"><b>Generate Code</b></button>
+            <br><br>
+            <textarea name="content" id="id_content"></textarea>
+        </div>
+        <div id="right">
+            <button style="margin-right: 15px;" onclick="copyToClipboard()" id="copybtn"><b>Copy Code!</b></button>
+            <br><br>
+            <textarea name="content" id="output_scr">{{data.html_data}}</textarea>
+        </div>
+    <script>
+        CKEDITOR.replace('id_content');
+        function copyToClipboard(){
+            var textToCopy = document.getElementById("output_scr")
+            textToCopy.select();
+            document.execCommand("copy");
+            document.getElementById('copybtn').innerHTML='<b>Copied!</b>';
+        }
+    </script>
+    <script>
+        CKEDITOR.replace('id_content');
+        $(document).ready(function() {
+            $("#generateCodeButton").click(function() {
+                document.getElementById('copybtn').innerHTML='<b>Copy Code!</b>';
+                var content = CKEDITOR.instances.id_content.getData();
+                if(content !== ""){
+                        $.ajax({
+                        url: "generateCode",
+                        type: "GET",
+                        data: {
+                                content: content
+                            },
+                        success: function(response) {
+                            // alert(response.message);
+                            document.getElementById('output_scr').innerHTML=response.message;
+                        },
+                        error: function(xhr, status, error) {
+                            alert("Failed to generate code: " + error);
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
